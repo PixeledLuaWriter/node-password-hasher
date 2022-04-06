@@ -4,7 +4,7 @@ this was created to just hash passwords with an algorithm from the built-in cryp
 
 **REQUIRED DEPENDENCIES**
 
-chalk 4.1.2
+chalk 4.1.2,
 readline-sync
 
 you can install these with the following command below
