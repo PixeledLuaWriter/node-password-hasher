@@ -41,7 +41,7 @@ function genSalt(rounds) {
 	if (typeof rounds !== 'number') {
 		throw new Error(`Rounds parameter must be an integer/number not a(n) ${typeof rounds}`)
     }
-    if (rounds == null) {
+	if (rounds == null) {
 		rounds = 29
     }
 	if (rounds == Infinity) {
@@ -230,5 +230,5 @@ if(selection === "hash") {
         }, 500)
     }
 } else {
-    // Removed return due to typescript 4.6 screaming at a return in an if statement
+    
 }
