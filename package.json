@@ -1,1 +1,26 @@
-{}
+{
+  "name": "node-password-hasher",
+  "version": "1.0.0",
+  "description": "Every new repl comes with a `.replit` and a `replit.nix` file that let you configure your repl to do just about anything in any language!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PixeledLuaWriter/node-password-hasher.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PixeledLuaWriter/node-password-hasher/issues"
+  },
+  "homepage": "https://github.com/PixeledLuaWriter/node-password-hasher#readme",
+  "devDependencies": {
+    "chalk": "^4.1.2",
+    "gradient-string": "^2.0.2",
+    "readline-sync": "^1.4.10",
+    "tinygradient": "^1.1.5"
+  }
+}
