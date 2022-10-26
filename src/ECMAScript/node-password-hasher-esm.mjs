@@ -29,21 +29,25 @@ GNU Affero General Public License for more details.
     both modules (if "|" doesn't work with node 12 then use && for node 12.x and lower)
 */
 
-const { createHmac, randomBytes } = import("crypto");
-const readlineSync = import("readline-sync");
-const chalk = import("chalk");
+import { createHmac, randomBytes } from "node:crypto";
+import readlineSync from "readline-sync";
+import chalk from "chalk";
+import gradient from "gradient-string";
 
 function genSalt(rounds) {
-    if (rounds > 32) {
-        throw new Error(`${rounds} is greater than the maximum length, please use a shorter number next time`)
+	if (rounds > 32) {
+		throw new Error(`${rounds} is greater than the maximum length, please use a shorter number next time`)
+	}
+	if (typeof rounds !== 'number') {
+		throw new Error(`Rounds parameter must be an integer/number not a(n) ${typeof rounds}`)
     }
-    if (typeof rounds !== 'number') {
-        throw new Error(`Rounds parameter must be an integer/number not a(n) ${typeof rounds}`)
+	if (rounds == null) {
+		rounds = 29
     }
-    if (rounds == null) {
-        rounds = 29
-    }
-    return randomBytes(Math.ceil(rounds / 2)).toString('hex').slice(0, rounds)
+	if (rounds == Infinity) {
+		rounds = 65
+	}
+	return randomBytes(Math.ceil(rounds / 2)).toString('hex').slice(0, rounds)
 }
 
 function hasher(algorithm, pwrd, salt) {
@@ -81,7 +85,11 @@ const ColorLog = (color, output) => {
     console.log(chalk[color](`${output}`))
 }
 
-const selection = readlineSync.question(chalk.yellowBright("Do you want to hash and validate an encrypted cipher/hash or do you want to hash a password? (validate or hash)\n"))
+const GradientLog = (color, input) => {
+    console.log(gradient[color](`${input}`))
+}
+
+const selection = readlineSync.question(gradient.atlas("Do you want to hash and validate an encrypted cipher/hash or do you want to hash a password? (validate or hash)\n"))
 if(selection === "hash") {
     if (readlineSync.keyInYN(chalk.yellowBright("Do you wish to use an optional algorithm within this setup?\n"))) {
         const algorithm_list = [
@@ -120,31 +128,38 @@ if(selection === "hash") {
             "sha512-256WithRSAEncryption",
             "sha512WithRSAEncryption",
         ]
-        const chosen_algorithm = readlineSync.keyInSelect(algorithm_list, 'Choose a Hashing Algorithm')
-        const pass = readlineSync.question(chalk.red.italic("Please Input a password to encrypt it\n->"), {
+        const chosen_algorithm = readlineSync.keyInSelect(algorithm_list, gradient.rainbow('Choose a Hashing Algorithm'))
+        const pass = readlineSync.question(chalk.red.italic("Please Input a password to encrypt it\n-> "), {
             hideEchoBack: true,
-            mask: chalk.rgb(172, 172, 172)("-")
-        })
-        const salt_length = readlineSync.questionInt(chalk.red.italic("How long do you want your salt string ranging from (1-32)?\n"))
-        setTimeout(() => {
-            ColorLog("cyan", "Password & Salt")
-        }, 0)
-        setTimeout(() => {
-            let pwrd = hash(algorithm_list[chosen_algorithm], pass, genSalt(salt_length))
-            ColorLog("yellowBright", `<============== HASH + SALT ==============>\n Encrypted Password: ${pwrd.hashed_password + pwrd.salt}\n\n`)
-        }, 500)
-    } else {
-        const pass = readlineSync.question(chalk.red.italic("Please Input a password to encrypt it\n->"), {
-            hideEchoBack: true,
-            mask: chalk.rgb(172, 172, 172)("-")
+            mask: gradient.atlas("-")
         })
         const salt_length = readlineSync.questionInt(chalk.red.italic("How long do you want your salt string ranging from (1-32)?\n"))
         setTimeout(() => {
             ColorLog("reset", "\n")
         }, 0)
         setTimeout(() => {
+            let pwrd = hash(algorithm_list[chosen_algorithm], pass, genSalt(salt_length))
+            GradientLog("rainbow", `<${'='.repeat(30)} HASH + SALT ${'='.repeat(30)}>\n Encrypted Password: ${pwrd.hashed_password + pwrd.salt}\n<${'='.repeat(60 + 14 - 1)}>\n\n`)
+        }, 500)
+    } else {
+        const pass = readlineSync.question(gradient.rainbow("Please Input a password to encrypt it\n-> "), {
+            hideEchoBack: true,
+            mask: gradient.rainbow("-")
+        })
+        const salt_length = readlineSync.questionInt(chalk.red.italic("How long do you want your salt string ranging from (1-32)?\n"), {
+			hideEchoBack: true,
+			mask: gradient([
+				{r: 255, g: 174, b: 0},
+				{r: 64, g: 64, b: 64},
+				{r: 255, g: 102, b: 0}
+			])("*")
+		})
+        setTimeout(() => {
+            ColorLog("reset", "\n")
+        }, 0)
+        setTimeout(() => {
             let pwrd = hash("sha512", pass, genSalt(salt_length))
-            ColorLog("yellowBright", `<============== HASH + SALT ==============>\n Encrypted Password: ${pwrd.hashed_password + pwrd.salt}\n\n`)
+            GradientLog("rainbow", `<${'='.repeat(30)} HASH + SALT ${'='.repeat(30)}>\n Encrypted Password: ${pwrd.hashed_password + pwrd.salt}\n<${'='.repeat(60 + 14 - 1)}>\n\n`)
         }, 500)
     }
 } else if(selection === "validate") {
@@ -186,7 +201,7 @@ if(selection === "hash") {
             "sha512WithRSAEncryption",
         ]
         const chosen_algorithm = readlineSync.keyInSelect(algorithm_list, 'Choose a Hashing Algorithm')
-        const pass = readlineSync.question(chalk.red.italic("Please Input a password to encrypt it\n->  "), {
+        const pass = readlineSync.question(chalk.red.italic("Please Input a password to encrypt it\n-> "), {
             hideEchoBack: true,
             mask: chalk.rgb(172, 172, 172)("-")
         })
@@ -197,23 +212,23 @@ if(selection === "hash") {
         setTimeout(() => {
             let pwrd = hash(algorithm_list[chosen_algorithm], pass, genSalt(salt_length))
             let validated = validateHash(algorithm_list[chosen_algorithm], pass, pwrd.hashed_password, pwrd.salt)
-            ColorLog("yellowBright", `<============== VALIDATION ==============>\nOriginal Password: ${pass}\nEncrypted Password: ${pwrd.hashed_password + pwrd.salt}\nHash Algorithm Type: ${algorithm_list[chosen_algorithm]}\nValidation Status: ${validated}\n\n`)
+            GradientLog("rainbow", `<${'='.repeat(30)} VALIDATION ${'='.repeat(30)}>\nOriginal Password: ${pass}\nEncrypted Password: ${pwrd.hashed_password + pwrd.salt}\nHash Algorithm Type: ${algorithm_list[chosen_algorithm]}\nValidation Status: ${validated}\n<${'='.repeat(60 + 13 - 1)}>\n\n`)
         }, 500)
     } else {
-        const pass = readlineSync.question(chalk.red.italic("Please Input a password to encrypt it -> "), {
+        const pass = readlineSync.question(chalk.red.italic("Please Input a password to encrypt it\n-> "), {
             hideEchoBack: true,
             mask: chalk.rgb(172, 172, 172)("-")
         })
-        const salt_length = readlineSync.questionInt(chalk.red.italic("How long do you want your salt string ranging from (1-32)? "))
+        const salt_length = readlineSync.questionInt(chalk.red.italic("How long do you want your salt string ranging from (1-32)?\n "))
         setTimeout(() => {
             ColorLog("reset", "\n")
         }, 500)
         setTimeout(() => {
             let pwrd = hash("sha512", pass, genSalt(salt_length))
             let validated = validateHash("sha512", pass, pwrd.hashed_password, pwrd.salt)
-            ColorLog("yellowBright", `<============== VALIDATION ==============>\nOriginal Password: ${pass}\nEncrypted Password: ${pwrd.hashed_password + pwrd.salt}\nHash Algorithm Type: sha512\nValidation Status: ${validated}\n\n`)
+            GradientLog("rainbow", `<${'='.repeat(30)} VALIDATION ${'='.repeat(30)}>\nOriginal Password: ${pass}\nEncrypted Password: ${pwrd.hashed_password + pwrd.salt}\nHash Algorithm Type: sha512\nValidation Status: ${validated}\n<${'='.repeat(60 + 13 - 1)}>\n\n`)
         }, 500)
     }
 } else {
-    return
+    
 }
